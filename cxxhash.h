@@ -18,10 +18,10 @@ extern "C"
 #define XXH_PRIME64_5 2870177450012600261ULL
 
 
-#define XXH_PREFETCH_L1_DISTANCE 64     // L1 cache - for small jumps
-#define XXH_PREFETCH_L2_DISTANCE 128    // L2 cache - medium distance
-#define XXH_PREFETCH_L3_DISTANCE 256    // L3 cache - large datasets
-#define XXH_PREFETCH_AGGRESSIVE 512     // Very large datasets
+static uint64_t XXH_PREFETCH_L1_DISTANCE 64     // L1 cache - for small jumps
+static uint64_t XXH_PREFETCH_L2_DISTANCE 128    // L2 cache - medium distance
+static uint64_t XXH_PREFETCH_L3_DISTANCE 256    // L3 cache - large datasets
+static uint64_t XXH_PREFETCH_AGGRESSIVE 512     // Very large datasets
 
 #ifdef _MSC_VER
 	#include <intrin.h>
@@ -293,4 +293,5 @@ static uint64_t xxhash64(const void* restrict input, uint64_t len, uint64_t seed
 #endif
 
 #endif
+
 

@@ -1,6 +1,11 @@
 #ifndef HASHER_H
 #define HASHER_H
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
@@ -39,7 +44,7 @@
 
 #define XXALLIGNAS(x) __attribute__ ((aligned (x)))
 
-#elif defined(__MSC_VER) /*MSVC is the only crappy compiler that doesnt support majority of this... */
+#elif defined(__MSC_VER)
 
 #define XXH_PREFETCH(ptr) _mm_prefetch((const char*)(ptr), _MM_HINT_T0)
 #define XXH_PREFETCH_WRITE(ptr) _mm_prefetch((const char*)(ptr), _MM_HINT_T0)
@@ -49,7 +54,7 @@
 #define XXLIKELY(x) (x)
 #define XXCOLD
 
-#else   
+#else   /*MSVC is the only crappy compiler that doesnt support this*/
 
 #define XXH_PREFETCH(ptr) (void)(ptr)
 #define XXH_PREFETCH_WRITE(ptr) (void)(ptr)
@@ -283,5 +288,8 @@ static uint64_t xxhash64(const void* restrict input, uint64_t len, uint64_t seed
 
 }
 
+#ifdef __cplusplus
+|
+#endif
 
 #endif

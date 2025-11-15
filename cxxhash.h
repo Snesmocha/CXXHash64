@@ -288,10 +288,123 @@ static uint64_t xxhash64(const void* restrict input, uint64_t len, uint64_t seed
 
 }
 
+// utility cache functions
+/* Prefetch configuration structure */
+typedef struct 
+{
+    uint64_t l1_distance;
+    uint64_t l2_distance;
+    uint64_t l3_distance;
+    uint64_t aggressive;
+} xxhc_prefetch_config_t;
+
+/* Function to set all prefetch distances */
+void xxhc_set_prefetch_distances(uint64_t l1, uint64_t l2, uint64_t l3, uint64_t aggressive)
+{
+    xxhc_prefetch_l1_distance = l1;
+    xxhc_prefetch_l2_distance = l2;
+    xxhc_prefetch_l3_distance = l3;
+    xxhc_prefetch_aggressive = aggressive;
+}
+
+/* Function to set prefetch distances from configuration structure */
+void xxhc_set_prefetch_config(const xxhc_prefetch_config_t* config)
+{
+    if (config) 
+	{
+        xxhc_prefetch_l1_distance = config->l1_distance;
+        xxhc_prefetch_l2_distance = config->l2_distance;
+        xxhc_prefetch_l3_distance = config->l3_distance;
+        xxhc_prefetch_aggressive = config->aggressive;
+    }
+}
+
+/* Function to get current prefetch configuration */
+xxhc_prefetch_config_t xxhc_get_prefetch_config(void)
+{
+    xxhc_prefetch_config_t config = {
+        .l1_distance = xxhc_prefetch_l1_distance,
+        .l2_distance = xxhc_prefetch_l2_distance,
+        .l3_distance = xxhc_prefetch_l3_distance,
+        .aggressive = xxhc_prefetch_aggressive
+    };
+    return config;
+}
+
+/* Function to reset to default values */
+void xxhc_reset_prefetch_defaults(void)
+{
+    xxhc_prefetch_l1_distance = 64;
+    xxhc_prefetch_l2_distance = 128;
+    xxhc_prefetch_l3_distance = 256;
+    xxhc_prefetch_aggressive = 512;
+}
+
+/* PRESET FUNCTIONS */
+
+/* Conservative preset - minimal prefetching for memory-bound systems */
+void xxhc_set_prefetch_conservative(void)
+{
+    xxhc_set_prefetch_distances(32, 64, 128, 256);
+}
+
+/* Balanced preset - good for general purpose use */
+void xxhc_set_prefetch_balanced(void)
+{
+    xxhc_set_prefetch_distances(64, 128, 256, 512);  /* Same as defaults */
+}
+
+/* Aggressive preset - for CPU-bound systems with large datasets */
+void xxhc_set_prefetch_aggressive(void)
+{
+    xxhc_set_prefetch_distances(128, 256, 512, 1024);
+}
+
+/* Server preset - optimized for server workloads with large memory */
+void xxhc_set_prefetch_server(void)
+{
+    xxhc_set_prefetch_distances(96, 192, 384, 768);
+}
+
+/* Embedded preset - for systems with limited cache */
+void xxhc_set_prefetch_embedded(void)
+{
+    xxhc_set_prefetch_distances(16, 32, 64, 128);
+}
+
+/* Gaming preset - optimized for typical game data patterns */
+void xxhc_set_prefetch_gaming(void)
+{
+    xxhc_set_prefetch_distances(48, 96, 192, 384);
+}
+
+/* Database preset - for database and analytics workloads */
+void xxhc_set_prefetch_database(void)
+{
+    xxhc_set_prefetch_distances(80, 160, 320, 640);
+}
+
+/* Custom preset with scaling factor */
+void xxhc_set_prefetch_scaled(float scale_factor)
+{
+    if (scale_factor <= 0.0f) scale_factor = 1.0f;
+    
+    
+    xxhc_set_prefetch_distances (
+        (uint64_t)(64 * scale_factor),
+        (uint64_t)(128 * scale_factor),
+        (uint64_t)(256 * scale_factor),
+        (uint64_t)(512 * scale_factor)
+    );
+}
+
+
+
 #ifdef __cplusplus
 }
 #endif
 
 #endif
+
 
 

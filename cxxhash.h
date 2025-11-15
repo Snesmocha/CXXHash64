@@ -39,7 +39,7 @@
 
 #define XXALLIGNAS(x) __attribute__ ((aligned (x)))
 
-#elif defined(__MSC_VER)
+#elif defined(__MSC_VER) /*MSVC is the only crappy compiler that doesnt support majority of this... */
 
 #define XXH_PREFETCH(ptr) _mm_prefetch((const char*)(ptr), _MM_HINT_T0)
 #define XXH_PREFETCH_WRITE(ptr) _mm_prefetch((const char*)(ptr), _MM_HINT_T0)
@@ -49,7 +49,7 @@
 #define XXLIKELY(x) (x)
 #define XXCOLD
 
-#else   /*MSVC is the only crappy compiler that doesnt support this*/
+#else   
 
 #define XXH_PREFETCH(ptr) (void)(ptr)
 #define XXH_PREFETCH_WRITE(ptr) (void)(ptr)
@@ -282,5 +282,6 @@ static uint64_t xxhash64(const void* restrict input, uint64_t len, uint64_t seed
 	return xxh64_final_mix(hash_64);
 
 }
+
 
 #endif

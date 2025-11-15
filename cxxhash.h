@@ -289,7 +289,8 @@ static uint64_t xxhash64(const void* restrict input, uint64_t len, uint64_t seed
 }
 
 #ifdef __cplusplus
-|
+}
 #endif
 
 #endif
+

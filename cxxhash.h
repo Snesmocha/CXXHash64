@@ -18,10 +18,17 @@ extern "C"
 #define XXH_PRIME64_5 2870177450012600261ULL
 
 
-static uint64_t XXH_PREFETCH_L1_DISTANCE 64     // L1 cache - for small jumps
-static uint64_t XXH_PREFETCH_L2_DISTANCE 128    // L2 cache - medium distance
-static uint64_t XXH_PREFETCH_L3_DISTANCE 256    // L3 cache - large datasets
-static uint64_t XXH_PREFETCH_AGGRESSIVE 512     // Very large datasets
+#define XXH_PRIME64_1 11400714785074694791ULL
+#define XXH_PRIME64_2 14029467366897019727ULL
+#define XXH_PRIME64_3 1609587929392839161ULL
+#define XXH_PRIME64_4 9650029242287828579ULL
+#define XXH_PRIME64_5 2870177450012600261ULL
+
+
+static uint64_t XXH_PREFETCH_L1_DISTANCE = 64;    // L1 cache - for small jumps
+static uint64_t XXH_PREFETCH_L2_DISTANCE = 128;    // L2 cache - medium distance
+static uint64_t XXH_PREFETCH_L3_DISTANCE = 256;    // L3 cache - large datasets
+static uint64_t XXH_PREFETCH_AGGRESSIVE  = 512;     // Very large datasets
 
 #ifdef _MSC_VER
 	#include <intrin.h>
@@ -169,7 +176,7 @@ XXCOLD XXNO_INLINE static uint64_t xxh64_small(const void* restrict input, uint6
 	return xxh64_final_mix(hash);
 }
 
-static uint64_t xxhash64(const void* restrict input, uint64_t len, uint64_t seed)
+static XXNO_INLINE uint64_t xxhash64(const void* restrict input, uint64_t len, uint64_t seed)
 {
 	if (XXUNLIKELY(len < 32)) return xxh64_small(input, len, seed);
 	
@@ -205,7 +212,7 @@ static uint64_t xxhash64(const void* restrict input, uint64_t len, uint64_t seed
 
 			#ifdef SSE4
 
-			uint64_t k1,k2,k3,k4;
+			
 			__m128i k12 = _mm_load_si128((const __m128i*)p); p += 16;
 			__m128i k34 = _mm_load_si128((const __m128i*)p); p += 16;
 
@@ -213,7 +220,7 @@ static uint64_t xxhash64(const void* restrict input, uint64_t len, uint64_t seed
 			v34 = xxh_round_sse( v34, k34);
 
 			#else
-    
+            uint64_t k1,k2,k3,k4;
 			k1 = *(const uint64_t*)p; p += 8;
 			k2 = *(const uint64_t*)p; p += 8;
 			k3 = *(const uint64_t*)p; p += 8;
@@ -299,93 +306,93 @@ typedef struct
 } xxhc_prefetch_config_t;
 
 /* Function to set all prefetch distances */
-void xxhc_set_prefetch_distances(uint64_t l1, uint64_t l2, uint64_t l3, uint64_t aggressive)
+XXFORCE_INLINE void xxhc_set_prefetch_distances(uint64_t l1, uint64_t l2, uint64_t l3, uint64_t aggressive)
 {
-    xxhc_prefetch_l1_distance = l1;
-    xxhc_prefetch_l2_distance = l2;
-    xxhc_prefetch_l3_distance = l3;
-    xxhc_prefetch_aggressive = aggressive;
+    XXH_PREFETCH_L1_DISTANCE  = l1;
+    XXH_PREFETCH_L2_DISTANCE  = l2;
+    XXH_PREFETCH_L3_DISTANCE  = l3;
+    XXH_PREFETCH_AGGRESSIVE  = aggressive;
 }
 
 /* Function to set prefetch distances from configuration structure */
-void xxhc_set_prefetch_config(const xxhc_prefetch_config_t* config)
+XXFORCE_INLINE void xxhc_set_prefetch_config(const xxhc_prefetch_config_t* config)
 {
     if (config) 
 	{
-        xxhc_prefetch_l1_distance = config->l1_distance;
-        xxhc_prefetch_l2_distance = config->l2_distance;
-        xxhc_prefetch_l3_distance = config->l3_distance;
-        xxhc_prefetch_aggressive = config->aggressive;
+        XXH_PREFETCH_L1_DISTANCE = config->l1_distance;
+        XXH_PREFETCH_L2_DISTANCE = config->l2_distance;
+        XXH_PREFETCH_L3_DISTANCE = config->l3_distance;
+        XXH_PREFETCH_AGGRESSIVE = config->aggressive;
     }
 }
 
 /* Function to get current prefetch configuration */
-xxhc_prefetch_config_t xxhc_get_prefetch_config(void)
+XXFORCE_INLINE xxhc_prefetch_config_t xxhc_get_prefetch_config(void)
 {
     xxhc_prefetch_config_t config = {
-        .l1_distance = xxhc_prefetch_l1_distance,
-        .l2_distance = xxhc_prefetch_l2_distance,
-        .l3_distance = xxhc_prefetch_l3_distance,
-        .aggressive = xxhc_prefetch_aggressive
+        .l1_distance = XXH_PREFETCH_L1_DISTANCE,
+        .l2_distance = XXH_PREFETCH_L2_DISTANCE,
+        .l3_distance = XXH_PREFETCH_L3_DISTANCE,
+        .aggressive = XXH_PREFETCH_AGGRESSIVE
     };
     return config;
 }
 
 /* Function to reset to default values */
-void xxhc_reset_prefetch_defaults(void)
+XXFORCE_INLINE void xxhc_reset_prefetch_defaults(void)
 {
-    xxhc_prefetch_l1_distance = 64;
-    xxhc_prefetch_l2_distance = 128;
-    xxhc_prefetch_l3_distance = 256;
-    xxhc_prefetch_aggressive = 512;
+    XXH_PREFETCH_L1_DISTANCE = 64;
+    XXH_PREFETCH_L2_DISTANCE = 128;
+    XXH_PREFETCH_L3_DISTANCE = 256;
+    XXH_PREFETCH_AGGRESSIVE = 512;
 }
 
 /* PRESET FUNCTIONS */
 
 /* Conservative preset - minimal prefetching for memory-bound systems */
-void xxhc_set_prefetch_conservative(void)
+XXFORCE_INLINE void xxhc_set_prefetch_conservative(void)
 {
     xxhc_set_prefetch_distances(32, 64, 128, 256);
 }
 
 /* Balanced preset - good for general purpose use */
-void xxhc_set_prefetch_balanced(void)
+XXFORCE_INLINE void xxhc_set_prefetch_balanced(void)
 {
     xxhc_set_prefetch_distances(64, 128, 256, 512);  /* Same as defaults */
 }
 
 /* Aggressive preset - for CPU-bound systems with large datasets */
-void xxhc_set_prefetch_aggressive(void)
+XXFORCE_INLINE void xxhc_set_prefetch_aggressive(void)
 {
     xxhc_set_prefetch_distances(128, 256, 512, 1024);
 }
 
 /* Server preset - optimized for server workloads with large memory */
-void xxhc_set_prefetch_server(void)
+XXFORCE_INLINE void xxhc_set_prefetch_server(void)
 {
     xxhc_set_prefetch_distances(96, 192, 384, 768);
 }
 
 /* Embedded preset - for systems with limited cache */
-void xxhc_set_prefetch_embedded(void)
+XXFORCE_INLINE void xxhc_set_prefetch_embedded(void)
 {
     xxhc_set_prefetch_distances(16, 32, 64, 128);
 }
 
 /* Gaming preset - optimized for typical game data patterns */
-void xxhc_set_prefetch_gaming(void)
+XXFORCE_INLINE void xxhc_set_prefetch_gaming(void)
 {
     xxhc_set_prefetch_distances(48, 96, 192, 384);
 }
 
 /* Database preset - for database and analytics workloads */
-void xxhc_set_prefetch_database(void)
+XXFORCE_INLINE void xxhc_set_prefetch_database(void)
 {
     xxhc_set_prefetch_distances(80, 160, 320, 640);
 }
 
 /* Custom preset with scaling factor */
-void xxhc_set_prefetch_scaled(float scale_factor)
+XXFORCE_INLINE void xxhc_set_prefetch_scaled(float scale_factor)
 {
     if (scale_factor <= 0.0f) scale_factor = 1.0f;
     
@@ -399,12 +406,12 @@ void xxhc_set_prefetch_scaled(float scale_factor)
 }
 
 
-
 #ifdef __cplusplus
 }
 #endif
 
 #endif
+
 
 
 
